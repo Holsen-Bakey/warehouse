@@ -1,5 +1,4 @@
 # warehouse
-The first commit
 https://github.com/Holsen-Bakey/warehouse.git
 
 
