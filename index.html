@@ -1,1 +1,145 @@
-<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=/favicon.ico><title>vuepre</title><link href=/js/login_home.a5259e11.js rel=prefetch><link href=/js/app.d41105af.js rel=preload as=script><link href=/js/chunk-vendors.f6ff0f08.js rel=preload as=script></head><body><noscript><strong>We're sorry but vuepre doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id=app></div><script src=/js/chunk-vendors.f6ff0f08.js></script><script src=/js/app.d41105af.js></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的绘图</title>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="800" height="600"></canvas>
+</body>
+<script>
+    var data = [{
+        x: 100,
+        y: 120
+    }, {
+        x: 200,
+        y: 320
+    }, {
+        x: 400,
+        y: 320
+    }, {
+        x: 500,
+        y: 320
+    }, {
+        x: 500,
+        y: 320
+    }, {
+        x: 400,
+        y: 620
+    }];
+
+    var LineChar = function(ctx) {
+        this.ctx = ctx || document.querySelector('canvas').getContext('2d')
+        this.canvasWidth = this.ctx.canvas.width;
+        this.canvasHeight = this.ctx.canvas.height;
+        this.gridSize = 10;
+        this.space = 20;
+        this.x0 = this.space;
+        this.y0 = this.canvasHeight - this.space;
+        this.arrowSize = 10;
+        this.dottedSize = 6;
+    }
+
+    LineChar.prototype.init = function(data) {
+        this.drawGrid()
+        this.drawAxis()
+        this.drawDotted(data)
+    }
+
+    LineChar.prototype.drawGrid = function() {
+        var xLineTotal = Math.floor(this.canvasHeight / this.gridSize)
+        this.ctx.strokeStyle = '#eee';
+        for (var i = 0; i <= xLineTotal; i++) {
+            this.ctx.beginPath()
+            this.ctx.moveTo(0, i * this.gridSize - 0.5)
+            this.ctx.lineTo(this.canvasWidth, i * this.gridSize - 0.5)
+            this.ctx.stroke()
+        }
+
+        var yLineTotal = Math.floor(this.canvasWidth / this.gridSize);
+        for (var i = 0; i <= yLineTotal; i++) {
+            this.ctx.beginPath()
+            this.ctx.moveTo(i * this.gridSize - 0.5, 0)
+            this.ctx.lineTo(i * this.gridSize - 0.5, this.canvasHeight)
+            this.ctx.stroke();
+        }
+    }
+
+    LineChar.prototype.drawAxis = function() {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = '#000'
+        this.ctx.moveTo(this.x0, this.y0)
+        this.ctx.lineTo(this.canvasWidth - this.space, this.y0)
+        this.ctx.lineTo(this.canvasWidth - this.space - this.arrowSize, this.y0 + this.arrowSize / 2)
+        this.ctx.lineTo(this.canvasWidth - this.space - this.arrowSize, this.y0 - this.arrowSize / 2)
+        this.ctx.lineTo(this.canvasWidth - this.space, this.y0)
+        this.ctx.stroke()
+        this.ctx.fill()
+
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = '#000';
+        this.ctx.moveTo(this.x0, this.y0);
+        this.ctx.lineTo(this.space, this.space);
+        this.ctx.lineTo(this.space + this.arrowSize / 2, this.space + this.arrowSize);
+        this.ctx.lineTo(this.space - this.arrowSize / 2, this.space + this.arrowSize);
+        this.ctx.lineTo(this.space, this.space);
+        this.ctx.stroke();
+        this.ctx.fill();
+    }
+
+    LineChar.prototype.drawDotted = function(data) {
+        /*1.数据的坐标 需要转换 canvas坐标*/
+        /*2.再进行点的绘制*/
+        /*3.把线连起来*/
+        var that = this;
+        /*记录当前坐标*/
+        var prevCanvasX = 0;
+        var prevCanvasY = 0;
+        data.forEach(function(item, i) {
+            /* x = 原点的坐标 + 数据的坐标 */
+            /* y = 原点的坐标 - 数据的坐标 */
+            var canvasX = that.x0 + item.x;
+            var canvasY = that.y0 - item.y;
+            /*绘制点*/
+            that.ctx.beginPath();
+            //  1  2
+            //   4  3
+            that.ctx.moveTo(canvasX - that.dottedSize / 2, canvasY - that.dottedSize / 2);
+            that.ctx.lineTo(canvasX + that.dottedSize / 2, canvasY - that.dottedSize / 2);
+            that.ctx.lineTo(canvasX + that.dottedSize / 2, canvasY + that.dottedSize / 2);
+            that.ctx.lineTo(canvasX - that.dottedSize / 2, canvasY + that.dottedSize / 2);
+            that.ctx.closePath();
+            that.ctx.fill();
+            /*点的连线*/
+            /*当时第一个点的时候 起点是 x0 y0*/
+            /*当时不是第一个点的时候 起点是 上一个点*/
+            if (i == 0) {
+                that.ctx.beginPath();
+                that.ctx.moveTo(that.x0, that.y0);
+                that.ctx.lineTo(canvasX, canvasY);
+                that.ctx.stroke();
+            } else {
+                /*上一个点*/
+                that.ctx.beginPath();
+                that.ctx.moveTo(prevCanvasX, prevCanvasY);
+                that.ctx.lineTo(canvasX, canvasY);
+                that.ctx.stroke();
+            }
+            /*记录当前的坐标，下一次要用*/
+            prevCanvasX = canvasX;
+            prevCanvasY = canvasY;
+        });
+
+    };
+
+
+
+
+    var LineChar = new LineChar()
+    LineChar.init(data)
+</script>
+
+</html>
